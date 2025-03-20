@@ -1,22 +1,28 @@
-name: check-md-changes
+name: List Changed Files in PR
 
-on: 
+on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  check-changes:
+  diff-files:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with: 
-          fetch-deph: 0
-        
 
-      - name: Check for changes in .md file
-        run: git fetch origin main
-          echo "Changed Files:"
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Get full history
+
+      - name: Fetch base branch and list changed files
+        run: |
+          git fetch origin main
+          echo "Changed files:"
           git diff --name-only origin/main...HEAD > changed_files.txt
-          cat changed_files.txt 
-            
+          cat changed_files.txt
+
+      - name: Upload changed files (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: changed-files
+          path: changed_files.txt
